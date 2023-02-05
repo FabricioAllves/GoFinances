@@ -9,7 +9,7 @@ import {
 } from '@expo-google-fonts/poppins'
 
 import theme from './src/global/styles/theme'
-import { DashBoard } from "./src/pages/DashBoard";
+import { Register } from "./src/pages/Register";
 import { Loading } from "./src/components/Loading";
 
 
@@ -23,7 +23,7 @@ export default function App() {
 
   return (
     <ThemeProvider theme={theme}>
-      <DashBoard />
+      <Register />
     </ThemeProvider>
   );
 }
