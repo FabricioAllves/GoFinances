@@ -9,8 +9,9 @@ import {
 } from '@expo-google-fonts/poppins'
 
 import theme from './src/global/styles/theme'
-import { Register } from "./src/pages/Register";
+import { DashBoard } from "./src/pages/DashBoard";
 import { Loading } from "./src/components/Loading";
+
 
 
 export default function App() {
@@ -23,7 +24,7 @@ export default function App() {
 
   return (
     <ThemeProvider theme={theme}>
-      <Register />
+      <DashBoard />
     </ThemeProvider>
   );
 }
