@@ -1,6 +1,8 @@
 import React from "react";
 import { ThemeProvider } from 'styled-components'
 
+import { NavigationContainer } from "@react-navigation/native";
+
 import {
   useFonts,
   Poppins_400Regular,
@@ -11,21 +13,23 @@ import {
 import theme from './src/global/styles/theme'
 import { Loading } from "./src/components/Loading";
 
-import { Register } from "./src/pages/Register";
+import { AppRoutes } from "./src/routes/app.routes";
 
 
 
 export default function App() {
 
-  const [fontsLoaded] = useFonts({Poppins_400Regular, Poppins_500Medium, Poppins_700Bold});
+  const [fontsLoaded] = useFonts({ Poppins_400Regular, Poppins_500Medium, Poppins_700Bold });
 
-  if(!fontsLoaded) {
+  if (!fontsLoaded) {
     return <Loading />
   }
 
   return (
     <ThemeProvider theme={theme}>
-      <Register />
+      <NavigationContainer>
+        <AppRoutes />
+      </NavigationContainer>
     </ThemeProvider>
   );
 }
