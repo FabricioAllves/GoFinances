@@ -65,7 +65,7 @@ export function Register({ name, amount }: FormData) {
 
   function handleRegister(form: FormData) {
 
-    if (transactionType)
+    if (!transactionType)
       return Alert.alert('Selecione o tipo da transação.')
 
     if (category.key === 'category')
