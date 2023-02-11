@@ -77,7 +77,7 @@ export function Register({ name, amount }: FormData) {
 
 
 
-    const data = {
+    const newTransaction = {
       name: form.name,
       amount: form.amount,
       transactionType,
@@ -85,7 +85,15 @@ export function Register({ name, amount }: FormData) {
     }
     
     try{
-      await AsyncStorage.setItem(dataKey, JSON.stringify(data))
+      const data = await AsyncStorage.getItem(dataKey);
+      const currentData = data ? JSON.parse(data) : [];
+
+      const dataFormatted = [
+        ...currentData,
+        newTransaction
+      ]
+
+      await AsyncStorage.setItem(dataKey, JSON.stringify(dataFormatted))
 
     }catch(error){
       console.log(error)
@@ -96,10 +104,11 @@ export function Register({ name, amount }: FormData) {
   useEffect(() => {
     async function loadData(){
       const data = await AsyncStorage.getItem(dataKey)
-      console.log(data)
+      console.log(JSON.parse(data!))
     }
 
     loadData()
+
   },[])
 
   return (
