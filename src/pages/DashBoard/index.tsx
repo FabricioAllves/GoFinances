@@ -1,7 +1,11 @@
-import React from "react";
+import React, { useCallback, useEffect, useState } from "react";
+
+import { useFocusEffect } from '@react-navigation/native'
 
 import { HighlightCard } from "../../components/HighlightCard";
 import { TransactionCard, TransactionCardProps } from "../../components/TransactionCard";
+
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import {
   Container,
@@ -24,51 +28,96 @@ export interface DataListProps extends TransactionCardProps {
   id: string
 }
 
+interface HighlightProps {
+  amount: string
+}
+
+interface HighlightData {
+  entries: HighlightProps
+  expensives: HighlightProps
+  total: HighlightProps
+}
+
 export function DashBoard() {
-  const data: DataListProps[] = [{
-    id: '1',
-    type: 'positive',
-    title: "Desenvolvimento de site",
-    amount: "R$ 12.000,00",
-    category: {
-      name: 'Vendas',
-      icon: 'dollar-sign'
-    },
-    date: "13/04/2023"
-  },
-  {
-    id: '2',
-    type: 'negative',
-    title: "Hamburguer Pizzy",
-    amount: "R$ 59,00",
-    category: {
-      name: 'Alimentação',
-      icon: 'coffee'
-    },
-    date: "13/04/2023"
-  },
-  {
-    id: '3',
-    type: 'negative',
-    title: "Aluguel do apartamento",
-    amount: "R$ 1.200,00",
-    category: {
-      name: 'Casa',
-      icon: 'shopping-bag'
-    },
-    date: "13/04/2023"
-  },
-  {
-    id: '4',
-    type: 'negative',
-    title: "Desenvolvimento de site",
-    amount: "R$ 12.000,00",
-    category: {
-      name: 'Vendas',
-      icon: 'dollar-sign'
-    },
-    date: "13/04/2023"
-  }]
+  const [transactions, setTransactions] = useState<DataListProps[]>([])
+  const [highlightData, setHighlightData] = useState<HighlightData>({} as HighlightData)
+
+  async function loadTransactions() {
+    const dataKey = '@gofinances:transactions';
+    const response = await AsyncStorage.getItem(dataKey)
+
+    const transactions = response ? JSON.parse(response) : [];
+
+    let entriesTotal = 0;
+    let expensiveTotal = 0;
+
+    const transactionsFormatted: DataListProps[] = transactions
+      .map((item: DataListProps) => {
+
+        if (item.type === 'positive') {
+          entriesTotal += Number(item.amount)
+        } else {
+          expensiveTotal += Number(item.amount)
+        }
+
+        const amount = Number(item.amount)
+          .toLocaleString('pt-BR', {
+            style: 'currency',
+            currency: 'BRL'
+          })
+
+
+        const date = Intl.DateTimeFormat('pt-BR', {
+          day: '2-digit',
+          month: '2-digit',
+          year: '2-digit'
+        }).format(new Date(item.date))
+
+        return {
+          id: item.id,
+          name: item.name,
+          amount,
+          type: item.type,
+          category: item.category,
+          date,
+        }
+      })
+
+    setTransactions(transactionsFormatted)
+
+    const total = entriesTotal - expensiveTotal;
+
+    setHighlightData({
+      entries: {
+        amount: entriesTotal.toLocaleString('pt-BR', {
+          style: 'currency',
+          currency: 'BRL'
+        })
+      },
+      expensives: {
+        amount: expensiveTotal.toLocaleString('pt-BR', {
+          style: 'currency',
+          currency: 'BRL'
+        })
+      },
+      total: {
+        amount: total.toLocaleString('pt-BR', {
+          style: 'currency',
+          currency: 'BRL'
+        })
+      }
+    }
+    )
+
+  }
+
+  useEffect(() => {
+    loadTransactions();
+  }, [])
+
+  useFocusEffect(useCallback(() => {
+    loadTransactions();
+  }, []))
 
   return (
     <Container>
@@ -89,16 +138,16 @@ export function DashBoard() {
       </Header>
 
       <HighlightCards>
-        <HighlightCard type="up" title="Entradas" amount="17.400,00" lastTransaction="Última entrada dia 13 de abril" />
-        <HighlightCard type="down" title="Saídas" amount="1.259,00" lastTransaction="Última saída dia 3 de abril" />
-        <HighlightCard type="total" title="Total" amount="16.141,00" lastTransaction="01 à 16 de abril" />
+        <HighlightCard type="up" title="Entradas" amount={highlightData.entries.amount} lastTransaction="Última entrada dia 13 de abril" />
+        <HighlightCard type="down" title="Saídas" amount={highlightData.expensives.amount} lastTransaction="Última saída dia 3 de abril" />
+        <HighlightCard type="total" title="Total" amount={highlightData.total.amount} lastTransaction="01 à 16 de abril" />
       </HighlightCards>
 
       <Transactions>
         <Title>Listagem</Title>
 
         <TransactionList
-          data={data}
+          data={transactions}
           keyExtractor={item => item.id}
           renderItem={({ item }) => <TransactionCard data={item} />}
         />
