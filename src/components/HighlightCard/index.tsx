@@ -35,7 +35,7 @@ export function HighlightCard({ type, title, amount, lastTransaction }: Props) {
 
       <Footer>
         <Amount type={type}>
-          R$ {amount}
+          {amount}
         </Amount>
         <LastTransaction type={type}>
           {lastTransaction}
